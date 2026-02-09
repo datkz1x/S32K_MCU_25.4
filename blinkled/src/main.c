@@ -35,42 +35,45 @@
 
 extern ARM_DRIVER_GPIO Driver_GPIO0;
 
+
 int main(void) {
 
-   /*Config PTC12, PTC13, PTD15, PTD16 as GPIO*/
-   Driver_GPIO0.Setup(ARM_GPIO_Pin_0, NULL);
-   Driver_GPIO0.Setup(ARM_GPIO_Pin_1, NULL);
-   Driver_GPIO0.Setup(ARM_GPIO_Pin_2, NULL);
-   Driver_GPIO0.Setup(ARM_GPIO_Pin_3, NULL);
+    /*Config PTC12, PTC13, PTD15, PTD16 as GPIO*/
+    Driver_GPIO0.Setup(ARM_GPIO_Pin_0, NULL);
+    Driver_GPIO0.Setup(ARM_GPIO_Pin_1, NULL);
+    Driver_GPIO0.Setup(ARM_GPIO_Pin_2, NULL);
+    Driver_GPIO0.Setup(ARM_GPIO_Pin_3, NULL);
 
-   /*Config PTC12 and PTC13 as input*/
-   Driver_GPIO0.SetDirection(ARM_GPIO_Pin_0, ARM_GPIO_INPUT);
-   Driver_GPIO0.SetDirection(ARM_GPIO_Pin_1, ARM_GPIO_INPUT);
+    /*Config PTC12 and PTC13 as input*/
+    Driver_GPIO0.SetDirection(ARM_GPIO_Pin_0, ARM_GPIO_INPUT);
+    Driver_GPIO0.SetDirection(ARM_GPIO_Pin_1, ARM_GPIO_INPUT);
 
-   /*Config PTC15 and PTC16 as output*/
-   Driver_GPIO0.SetDirection(ARM_GPIO_Pin_2, ARM_GPIO_OUTPUT);
-   Driver_GPIO0.SetDirection(ARM_GPIO_Pin_3, ARM_GPIO_OUTPUT);
+    /*Config PTC15 and PTC16 as output*/
+    Driver_GPIO0.SetDirection(ARM_GPIO_Pin_2, ARM_GPIO_OUTPUT);
+    Driver_GPIO0.SetDirection(ARM_GPIO_Pin_3, ARM_GPIO_OUTPUT);
 
-   /*Config pull-down for PTC12 and PTC13 */
-   Driver_GPIO0.SetPullResistor(ARM_GPIO_Pin_0, ARM_GPIO_PULL_DOWN);
-   Driver_GPIO0.SetPullResistor(ARM_GPIO_Pin_1, ARM_GPIO_PULL_DOWN);
+    /*Config pull-down for PTC12 and PTC13 */
+    Driver_GPIO0.SetPullResistor(ARM_GPIO_Pin_0, ARM_GPIO_PULL_DOWN);
+    Driver_GPIO0.SetPullResistor(ARM_GPIO_Pin_1, ARM_GPIO_PULL_DOWN);
 
-   /* Turn off PTD15 and PTD16 (Set = 1)*/
-   Driver_GPIO0.SetOutput(ARM_GPIO_Pin_2, 0);
-   Driver_GPIO0.SetOutput(ARM_GPIO_Pin_3, 0);
+    /* Turn off PTD15 and PTD16 (Set = 1)*/
+    Driver_GPIO0.SetOutput(ARM_GPIO_Pin_2, 0);
+    Driver_GPIO0.SetOutput(ARM_GPIO_Pin_3, 0);
 
-   while (1)
-   {
-      /*Logic to toggle PTD15*/
-      if(Driver_GPIO0.GetInput(ARM_GPIO_Pin_0) == 1){
-         Driver_GPIO0.ToggleOutput(ARM_GPIO_Pin_2);
-      }
-      /*Logic to toggle PTD16*/
-      if(Driver_GPIO0.GetInput(ARM_GPIO_Pin_1) == 1){
-         Driver_GPIO0.ToggleOutput(ARM_GPIO_Pin_3);
-      }
-   }
-   
+    while (1)
+    {
+       /*Logic to toggle PTD15*/
+       if(Driver_GPIO0.GetInput(ARM_GPIO_Pin_0) == 0){
+          Driver_GPIO0.ToggleOutput(ARM_GPIO_Pin_2);
+          //Driver_GPIO0.SetOutput(ARM_GPIO_Pin_2, 1);
+       }
+       /*Logic to toggle PTD16*/
+       if(Driver_GPIO0.GetInput(ARM_GPIO_Pin_1) == 0){
+          Driver_GPIO0.ToggleOutput(ARM_GPIO_Pin_3);
+          //Driver_GPIO0.SetOutput(ARM_GPIO_Pin_3, 1);
+       }
+    }
+
 
    return 0;
 }

@@ -1,0 +1,245 @@
+/*
+ * Copyright (c) 2023 ARM Limited. All rights reserved.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the License); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an AS IS BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "Driver_GPIO.h"
+#include "S32K144.h"
+// Pin mapping
+#define GPIO_MAX_PINS           (sizeof(gpio_pin_map)/sizeof(GPIO_PinMap_t))
+#define PIN_IS_AVAILABLE(n)     ((n) < GPIO_MAX_PINS)
+
+/*=====================Edit start=====================*/
+// PTC12 (Button 0) toggle PTD15 (Red LED)
+// PTC13 (Button 1) toggle PTD16 (Green LED)
+typedef struct {
+  PORT_Type *port;
+  GPIO_Type *gpio;
+  uint8_t    pin;
+  uint8_t    pcc_index;
+} GPIO_PinMap_t;
+
+static const GPIO_PinMap_t gpio_pin_map[] = {
+  {IP_PORTC, IP_PTC, 12, PCC_PORTC_INDEX}, //ARM_GPIO_Pin_0 (0U)
+  {IP_PORTC, IP_PTC, 13, PCC_PORTC_INDEX}, //ARM_GPIO_Pin_1 (1U)
+  {IP_PORTD, IP_PTD, 15, PCC_PORTD_INDEX}, //ARM_GPIO_Pin_2 (2U)
+  {IP_PORTD, IP_PTD, 16, PCC_PORTD_INDEX} //ARM_GPIO_Pin_3 (3U)
+};
+/*======================Edit end======================*/
+
+// Setup GPIO Interface
+static int32_t GPIO_Setup (ARM_GPIO_Pin_t pin, ARM_GPIO_SignalEvent_t cb_event) {
+  int32_t result = ARM_DRIVER_OK;
+
+  if (PIN_IS_AVAILABLE(pin)) {
+  } else {
+    result = ARM_GPIO_ERROR_PIN;
+  }
+
+  /*=====================Edit start=====================*/
+  const GPIO_PinMap_t *cfg = &gpio_pin_map[pin];
+  //Turn on PCC
+  //IP_PCC->PCCn[cfg->pcc_index] |= PCC_PCCn_CGC(1);
+  IP_PCC->PCCn[cfg->pcc_index] |= PCC_PCCn_CGC_MASK;
+  //Config pin as GPIO
+  cfg->port->PCR[cfg->pin] &= ~PORT_PCR_MUX_MASK;
+  cfg->port->PCR[cfg->pin] |= PORT_PCR_MUX(1);
+  /*======================Edit end======================*/
+  
+  return result;
+}
+
+// Set GPIO Direction
+static int32_t GPIO_SetDirection (ARM_GPIO_Pin_t pin, ARM_GPIO_DIRECTION direction) {
+  int32_t result = ARM_DRIVER_OK;
+
+  if (PIN_IS_AVAILABLE(pin)) {
+    switch (direction) {
+      case ARM_GPIO_INPUT:
+        break;
+      case ARM_GPIO_OUTPUT:
+        break;
+      default:
+        result = ARM_DRIVER_ERROR_PARAMETER;
+        break;
+    }
+  } else {
+    result = ARM_GPIO_ERROR_PIN;
+  }
+
+  /*=====================Edit start=====================*/
+  /*PDD reg: 0 is input and 1 is output*/
+  const GPIO_PinMap_t *cfg = &gpio_pin_map[pin];
+  //Config input or output
+  if (direction == ARM_GPIO_INPUT){
+    (cfg->gpio)->PDDR &= ~(1U << cfg->pin);
+  }
+  else if (direction == ARM_GPIO_OUTPUT){
+    (cfg->gpio)->PDDR |= (1U << cfg->pin); 
+  }
+  /*======================Edit end======================*/
+  
+  return result;
+}
+
+// Set GPIO Output Mode
+static int32_t GPIO_SetOutputMode (ARM_GPIO_Pin_t pin, ARM_GPIO_OUTPUT_MODE mode) {
+  int32_t result = ARM_DRIVER_OK;
+
+  if (PIN_IS_AVAILABLE(pin)) {
+    switch (mode) {
+      case ARM_GPIO_PUSH_PULL:
+        break;
+      case ARM_GPIO_OPEN_DRAIN:
+        break;
+      default:
+        result = ARM_DRIVER_ERROR_PARAMETER;
+        break;
+    }
+  } else {
+    result = ARM_GPIO_ERROR_PIN;
+  }
+  
+  return result;
+}
+
+// Set GPIO Pull Resistor
+static int32_t GPIO_SetPullResistor (ARM_GPIO_Pin_t pin, ARM_GPIO_PULL_RESISTOR resistor) {
+  int32_t result = ARM_DRIVER_OK;
+
+  if (PIN_IS_AVAILABLE(pin)) {
+    switch (resistor) {
+      case ARM_GPIO_PULL_NONE:
+        break;
+      case ARM_GPIO_PULL_UP:
+        break;
+      case ARM_GPIO_PULL_DOWN:
+        break;
+      default:
+        result = ARM_DRIVER_ERROR_PARAMETER;
+        break;
+    }
+  } else {
+    result = ARM_GPIO_ERROR_PIN;
+  }
+  
+  /*=====================Edit start=====================*/
+  const GPIO_PinMap_t *cfg = &gpio_pin_map[pin];
+  if (resistor == ARM_GPIO_PULL_UP){
+    /*Select pull-up*/
+    cfg->port->PCR[cfg->pin] |= (1U << 0);
+    /*Enable pull-up*/
+    cfg->port->PCR[cfg->pin] |= (1U << 1);
+  }
+  else if (resistor == ARM_GPIO_PULL_DOWN){
+    /*Select pull-down*/
+    cfg->port->PCR[cfg->pin] &= ~(1U << 0);
+    /*Enable pull-down*/
+    cfg->port->PCR[cfg->pin] |= (1U << 1);
+  }
+  else{
+    /*None*/
+    cfg->port->PCR[cfg->pin] &= ~(1U << 1);
+  }
+  /*======================Edit end======================*/
+
+  return result;
+}
+
+// Set GPIO Event Trigger
+static int32_t GPIO_SetEventTrigger (ARM_GPIO_Pin_t pin, ARM_GPIO_EVENT_TRIGGER trigger) {
+  int32_t result = ARM_DRIVER_OK;
+
+  if (PIN_IS_AVAILABLE(pin)) {
+    switch (trigger) {
+      case ARM_GPIO_TRIGGER_NONE:
+        break;
+      case ARM_GPIO_TRIGGER_RISING_EDGE:
+        break;
+      case ARM_GPIO_TRIGGER_FALLING_EDGE:
+        break;
+      case ARM_GPIO_TRIGGER_EITHER_EDGE:
+        break;
+      default:
+        result = ARM_DRIVER_ERROR_PARAMETER;
+        break;
+    }
+  } else {
+    result = ARM_GPIO_ERROR_PIN;
+  }
+
+  return result;
+}
+
+// Set GPIO Output Level
+static void GPIO_SetOutput (ARM_GPIO_Pin_t pin, uint32_t val) {
+
+  if (PIN_IS_AVAILABLE(pin)) {
+  }
+
+  /*=====================Edit start=====================*/
+  const GPIO_PinMap_t *cfg = &gpio_pin_map[pin];
+  if(val == 0){
+    cfg->gpio->PSOR = (1 << cfg->pin);
+  }
+  else if (val == 1){
+    cfg->gpio->PCOR = (1 << cfg->pin);  
+  }
+  /*======================Edit end======================*/
+
+}
+
+// Toggle GPIO Output Level
+// static void GPIO_ToggleOutput (ARM_GPIO_Pin_t pin) {
+
+//   if (PIN_IS_AVAILABLE(pin)) {
+//   }
+
+//   /*=====================Edit start=====================*/
+//   const GPIO_PinMap_t *cfg = &gpio_pin_map[pin];
+//   cfg->gpio->PTOR |= (1 << cfg->pin);
+//   /*======================Edit end======================*/
+
+// }
+
+
+// Get GPIO Input Level
+static uint32_t GPIO_GetInput (ARM_GPIO_Pin_t pin) {
+  uint32_t val = 0U;
+
+  if (PIN_IS_AVAILABLE(pin)) {
+  }
+  /*=====================Edit start=====================*/
+  const GPIO_PinMap_t *cfg = &gpio_pin_map[pin];
+  val = cfg->gpio->PDIR & (1 << cfg->pin);
+  /*======================Edit end======================*/
+
+  return val;
+  /*return value of pin*/
+}
+
+
+// GPIO Driver access structure
+ARM_DRIVER_GPIO Driver_GPIO0 = {
+  GPIO_Setup, /*Edited*/
+  GPIO_SetDirection, /*Edited*/
+  GPIO_SetOutputMode, 
+  GPIO_SetPullResistor, /*Edited*/
+  GPIO_SetEventTrigger,
+  GPIO_SetOutput, /*Edited*/
+  //GPIO_ToggleOutput, /*New added*/
+  GPIO_GetInput /*Edited*/
+};

@@ -1,5 +1,5 @@
 -DCPU_S32K144HFT0VLLT
--I"D:/S32K_MCU_Workspace/blinkled/include"
+-I"D:/S32K_MCU_Workspace/S32K_MCU_25.4/blinkled/include"
 -O0
 -g3
 -Wall

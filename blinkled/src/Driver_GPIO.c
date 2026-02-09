@@ -28,7 +28,7 @@
 typedef struct {
   PORT_Type *port;
   GPIO_Type *gpio;
-  uint8_t    pin;
+  uint8_t    pin_num;
   uint8_t    pcc_index;
 } GPIO_PinMap_t;
 
@@ -55,8 +55,7 @@ static int32_t GPIO_Setup (ARM_GPIO_Pin_t pin, ARM_GPIO_SignalEvent_t cb_event) 
   //IP_PCC->PCCn[cfg->pcc_index] |= PCC_PCCn_CGC(1);
   IP_PCC->PCCn[cfg->pcc_index] |= PCC_PCCn_CGC_MASK;
   //Config pin as GPIO
-  cfg->port->PCR[cfg->pin] &= ~PORT_PCR_MUX_MASK;
-  cfg->port->PCR[cfg->pin] |= PORT_PCR_MUX(1);
+  (cfg->port)->PCR[cfg->pin_num] |= PORT_PCR_MUX(001);
   /*======================Edit end======================*/
   
   return result;
@@ -85,10 +84,10 @@ static int32_t GPIO_SetDirection (ARM_GPIO_Pin_t pin, ARM_GPIO_DIRECTION directi
   const GPIO_PinMap_t *cfg = &gpio_pin_map[pin];
   //Config input or output
   if (direction == ARM_GPIO_INPUT){
-    cfg->gpio->PDDR &= ~(1U << cfg->pin);
+    (cfg->gpio)->PDDR &= ~(1U << (cfg->pin_num));
   }
   else if (direction == ARM_GPIO_OUTPUT){
-    cfg->gpio->PDDR |= (1U << cfg->pin); 
+    (cfg->gpio)->PDDR |= (1U << (cfg->pin_num));
   }
   /*======================Edit end======================*/
   
@@ -140,19 +139,19 @@ static int32_t GPIO_SetPullResistor (ARM_GPIO_Pin_t pin, ARM_GPIO_PULL_RESISTOR 
   const GPIO_PinMap_t *cfg = &gpio_pin_map[pin];
   if (resistor == ARM_GPIO_PULL_UP){
     /*Select pull-up*/
-    cfg->port->PCR[cfg->pin] |= (1U << 0);
+    (cfg->port)->PCR[cfg->pin_num] |= (1U << 0);
     /*Enable pull-up*/
-    cfg->port->PCR[cfg->pin] |= (1U << 1);
+    (cfg->port)->PCR[cfg->pin_num] |= (1U << 1);
   }
   else if (resistor == ARM_GPIO_PULL_DOWN){
     /*Select pull-down*/
-    cfg->port->PCR[cfg->pin] &= ~(1U << 0);
+    (cfg->port)->PCR[cfg->pin_num] &= ~(1U << 0);
     /*Enable pull-down*/
-    cfg->port->PCR[cfg->pin] |= (1U << 1);
+    (cfg->port)->PCR[cfg->pin_num] |= (1U << 1);
   }
   else{
     /*None*/
-    cfg->port->PCR[cfg->pin] &= ~(1U << 1);
+    (cfg->port)->PCR[cfg->pin_num] &= ~(1U << 1);
   }
   /*======================Edit end======================*/
 
@@ -193,16 +192,16 @@ static void GPIO_SetOutput (ARM_GPIO_Pin_t pin, uint32_t val) {
   /*=====================Edit start=====================*/
   const GPIO_PinMap_t *cfg = &gpio_pin_map[pin];
   if(val == 0){
-    cfg->gpio->PSOR = (1 << cfg->pin);
+    (cfg->gpio)->PSOR = (1 << (cfg->pin_num));
   }
   else if (val == 1){
-    cfg->gpio->PCOR = (1 << cfg->pin);  
+    (cfg->gpio)->PCOR = (1 << (cfg->pin_num));
   }
   /*======================Edit end======================*/
 
 }
 
-// Toggle GPIO Output Level
+//Toggle GPIO Output Level
 static void GPIO_ToggleOutput (ARM_GPIO_Pin_t pin) {
 
   if (PIN_IS_AVAILABLE(pin)) {
@@ -210,7 +209,7 @@ static void GPIO_ToggleOutput (ARM_GPIO_Pin_t pin) {
 
   /*=====================Edit start=====================*/
   const GPIO_PinMap_t *cfg = &gpio_pin_map[pin];
-  cfg->gpio->PTOR |= (1 << cfg->pin);
+  (cfg->gpio)->PTOR |= (1 << (cfg->pin_num));
   /*======================Edit end======================*/
 
 }
@@ -224,7 +223,7 @@ static uint32_t GPIO_GetInput (ARM_GPIO_Pin_t pin) {
   }
   /*=====================Edit start=====================*/
   const GPIO_PinMap_t *cfg = &gpio_pin_map[pin];
-  val = cfg->gpio->PDIR & (1 << cfg->pin);
+  val = ((cfg->gpio)->PDIR >> (cfg->pin_num) & 0x01);
   /*======================Edit end======================*/
 
   return val;

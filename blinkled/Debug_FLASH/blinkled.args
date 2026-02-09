@@ -1,5 +1,5 @@
 -T
-"D:/S32K_MCU_Workspace/blinkled/Project_Settings/Linker_Files/S32K144_64_flash.ld"
+"D:/S32K_MCU_Workspace/S32K_MCU_25.4/blinkled/Project_Settings/Linker_Files/S32K144_64_flash.ld"
 -Wl,-Map,"blinkled.map"
 -Xlinker
 --gc-sections

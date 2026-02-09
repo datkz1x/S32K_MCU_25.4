@@ -1,5 +1,5 @@
 -c
--I"D:/S32K_MCU_Workspace/blinkled/include"
+-I"D:/S32K_MCU_Workspace/S32K_MCU_25.4/blinkled/include"
 -x assembler-with-cpp
 -DSTART_FROM_FLASH
 -g3

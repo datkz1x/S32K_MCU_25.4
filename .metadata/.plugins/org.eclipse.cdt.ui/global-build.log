@@ -1,0 +1,26 @@
+23:50:09 **** Incremental Build of configuration Debug_FLASH for project blinkled ****
+make -j12 all 
+Building file: ../src/main.c
+Invoking: Standard S32DS C Compiler
+arm-none-eabi-gcc "@src/Driver_GPIO.args" -MMD -MP -MF"src/main.d" -MT"src/main.o" -o "src/main.o" "../src/main.c"
+Finished building: ../src/main.c
+ 
+Building target: blinkled.elf
+Invoking: Standard S32DS C Linker
+arm-none-eabi-gcc -o "blinkled.elf" "@blinkled.args"   
+Finished building target: blinkled.elf
+ 
+Invoking: Standard S32DS Print Size
+arm-none-eabi-size --format=berkeley blinkled.elf
+   text	   data	    bss	    dec	    hex	filename
+   6448	   2400	   3328	  12176	   2f90	blinkled.elf
+Finished building: blinkled.siz
+ 
+23:50:15 **** Incremental Build of configuration Debug_FLASH for project blinkled ****
+make -j12 all 
+Invoking: Standard S32DS Print Size
+arm-none-eabi-size --format=berkeley blinkled.elf
+   text	   data	    bss	    dec	    hex	filename
+   6448	   2400	   3328	  12176	   2f90	blinkled.elf
+Finished building: blinkled.siz
+ 
